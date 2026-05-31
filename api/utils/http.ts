@@ -45,6 +45,40 @@ export async function requestJson<T>(url: string, proxy: ProxyConfig): Promise<T
   return JSON.parse(text) as T
 }
 
+export async function requestPostJson<TResponse>(
+  url: string,
+  body: unknown,
+  proxy: ProxyConfig,
+): Promise<TResponse> {
+  if (!proxy.enabled) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...DEFAULT_HEADERS,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      throw new Error(`请求失败: ${response.status}`)
+    }
+
+    return (await response.json()) as TResponse
+  }
+
+  const response = await axios.post<TResponse>(url, body, {
+    ...buildRequestConfig(proxy),
+    responseType: 'json',
+    headers: {
+      ...DEFAULT_HEADERS,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  return response.data
+}
+
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     if (error.response) {

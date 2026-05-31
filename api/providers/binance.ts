@@ -1,5 +1,5 @@
 import type { CandleItem, MarketConfigItem, MarketReplayResult, ProxyConfig } from '../../shared/replay.js'
-import { trimCandles, toUnixSeconds } from '../../shared/replay.js'
+import { CANDLE_LIMIT, trimCandles, toUnixSeconds } from '../../shared/replay.js'
 import { requestJson } from '../utils/http.js'
 
 interface BinanceKlineItem extends Array<string | number> {
@@ -33,7 +33,7 @@ export async function fetchCryptoData(
   const url = new URL(baseUrl)
   url.searchParams.set('symbol', config.symbol.toUpperCase())
   url.searchParams.set('interval', config.interval || '1d')
-  url.searchParams.set('limit', '240')
+  url.searchParams.set('limit', String(CANDLE_LIMIT))
 
   const response = await requestJson<BinanceKlineItem[]>(url.toString(), proxy)
   const candles = trimCandles((response ?? []).map(parseBinanceCandle))

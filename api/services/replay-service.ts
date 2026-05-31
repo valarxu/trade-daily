@@ -9,7 +9,7 @@ import {
 } from '../../shared/replay.js'
 import { fetchCryptoData } from '../providers/binance.js'
 import { fetchAShareData } from '../providers/eastmoney.js'
-import { fetchFuturesData } from '../providers/sina-futures.js'
+import { fetchHyperliquidData } from '../providers/hyperliquid.js'
 import { fetchUSStockData } from '../providers/yahoo.js'
 import { getErrorMessage } from '../utils/http.js'
 
@@ -20,7 +20,7 @@ const marketProviders: Record<
   a_share: fetchAShareData,
   us_stock: fetchUSStockData,
   crypto: fetchCryptoData,
-  futures: fetchFuturesData,
+  futures: fetchHyperliquidData,
 }
 
 function getDefaultMarketByType(market: MarketType): MarketConfigItem {

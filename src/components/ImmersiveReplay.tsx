@@ -6,6 +6,7 @@ import {
   Settings2,
 } from 'lucide-react'
 import {
+  CANDLE_LIMIT,
   getLatestCandle,
   getMarketConfigsByType,
   MARKET_ORDER,
@@ -104,7 +105,7 @@ export default function ImmersiveReplay({
           </button>
         </header>
 
-        <nav className="flex gap-3 overflow-x-auto pb-4 pt-2">
+        <nav className="scrollbar-none flex gap-3 overflow-x-auto pb-4 pt-2">
           {marketTabs.map((market) => {
             const marketItems = getMarketConfigsByType(markets, market)
             const hasAnySuccess = results.some((item) => item.market === market && item.status === 'success')
@@ -130,7 +131,7 @@ export default function ImmersiveReplay({
           })}
         </nav>
 
-        <nav className="flex gap-2 overflow-x-auto pb-3">
+        <nav className="scrollbar-none flex gap-2 overflow-x-auto pb-3">
           {activeMarketItems.map((item, index) => {
             const isActive = index === activeSymbolIndex
             const itemResult = results.find(
@@ -170,7 +171,7 @@ export default function ImmersiveReplay({
                   <span className="rounded-full border border-white/10 px-3 py-1.5">
                     数据源 {activeInstrument.source}
                   </span>
-                  <span className="rounded-full border border-white/10 px-3 py-1.5">240 根 K 线</span>
+                  <span className="rounded-full border border-white/10 px-3 py-1.5">{CANDLE_LIMIT} 根 K 线</span>
                   <span className="rounded-full border border-white/10 px-3 py-1.5">
                     {activeSymbolIndex + 1} / {activeMarketItems.length}
                   </span>

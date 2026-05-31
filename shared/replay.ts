@@ -46,7 +46,7 @@ export interface SourceDescriptor {
   endpoint: string
 }
 
-export const CANDLE_LIMIT = 240
+export const CANDLE_LIMIT = 360
 export const MARKET_ORDER: MarketType[] = ['a_share', 'us_stock', 'crypto', 'futures']
 
 export const DEFAULT_PROXY_CONFIG: ProxyConfig = {
@@ -105,16 +105,12 @@ const DEFAULT_CRYPTO_ITEMS = [
 ] as const
 
 const DEFAULT_FUTURES_ITEMS = [
-  ['AU0', '黄金主连'],
-  ['CU0', '沪铜主连'],
-  ['AL0', '沪铝主连'],
-  ['SC0', '原油主连'],
-  ['RB0', '螺纹钢主连'],
-  ['TA0', 'PTA主连'],
-  ['M0', '豆粕主连'],
-  ['C0', '玉米主连'],
-  ['CF0', '棉花主连'],
-  ['SR0', '白糖主连'],
+  ['xyz:GOLD', 'Gold'],
+  ['xyz:SILVER', 'Silver'],
+  ['xyz:CL', 'WTI Crude'],
+  ['xyz:BRENTOIL', 'Brent Oil'],
+  ['xyz:COPPER', 'Copper'],
+  ['xyz:NATGAS', 'Natural Gas'],
 ] as const
 
 function getDefaultSource(market: MarketType, symbol: string): string {
@@ -130,7 +126,19 @@ function getDefaultSource(market: MarketType, symbol: string): string {
     return symbol.toUpperCase() === 'HYPEUSDT' ? 'binance-futures' : 'binance'
   }
 
-  return 'sina-futures'
+  return 'hyperliquid'
+}
+
+function getDefaultInterval(market: MarketType): string {
+  if (market === 'crypto') {
+    return '4h'
+  }
+
+  if (market === 'futures') {
+    return '1h'
+  }
+
+  return '1d'
 }
 
 function getDefaultNotes(market: MarketType, symbol: string): string {
@@ -144,11 +152,11 @@ function getDefaultNotes(market: MarketType, symbol: string): string {
 
   if (market === 'crypto') {
     return symbol.toUpperCase() === 'HYPEUSDT'
-      ? 'HYPE 使用 Binance USD-M Futures Klines 接口'
-      : '区块链使用 Binance Spot Klines 接口'
+      ? 'HYPE 使用 Binance USD-M Futures 4H Klines 接口'
+      : '区块链使用 Binance Spot 4H Klines 接口'
   }
 
-  return '大宗期货使用新浪期货日线接口'
+  return 'HyperLiquid 商品使用官方 candleSnapshot 1H K 线接口'
 }
 
 export function createMarketConfigItem(
@@ -160,7 +168,7 @@ export function createMarketConfigItem(
     market,
     symbol,
     label,
-    interval: '1d',
+    interval: getDefaultInterval(market),
     source: getDefaultSource(market, symbol),
     notes: getDefaultNotes(market, symbol),
   }
@@ -200,9 +208,9 @@ export const SOURCE_DESCRIPTORS: SourceDescriptor[] = [
   },
   {
     market: 'futures',
-    source: 'sina-futures',
-    description: '新浪期货公开日线接口，覆盖金属、能源、化工、农产品主连合约',
-    endpoint: 'https://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesDailyKLine',
+    source: 'hyperliquid',
+    description: 'HyperLiquid 官方 /info candleSnapshot，覆盖 Gold、Silver、WTI、Brent、Copper、Natural Gas',
+    endpoint: 'https://api.hyperliquid.xyz/info',
   },
 ]
 
@@ -210,7 +218,7 @@ export const MARKET_TITLES: Record<MarketType, string> = {
   a_share: 'A 股',
   us_stock: '美股',
   crypto: '区块链',
-  futures: '大宗期货',
+  futures: 'HyperLiquid',
 }
 
 export function getMarketConfigsByType(markets: MarketConfigItem[], market: MarketType): MarketConfigItem[] {

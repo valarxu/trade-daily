@@ -41,6 +41,10 @@ interface ReplayStore {
 
 type PersistedReplayStore = Pick<ReplayStore, 'proxy' | 'markets'>
 
+function getAvailableMarkets(markets: MarketConfigItem[]): MarketType[] {
+  return MARKET_ORDER.filter((market) => getMarketConfigsByType(markets, market).length > 0)
+}
+
 function replaceMarketGroup(
   markets: MarketConfigItem[],
   marketType: MarketType,
@@ -94,18 +98,55 @@ export const useReplayStore = create<ReplayStore>()(
           ),
         })),
       goToPreviousSymbol: () =>
-        set((state) => ({
-          activeSymbolIndex:
-            (state.activeSymbolIndex -
-              1 +
-              getMarketConfigsByType(state.markets, state.activeMarket).length) %
-            getMarketConfigsByType(state.markets, state.activeMarket).length,
-        })),
+        set((state) => {
+          const currentItems = getMarketConfigsByType(state.markets, state.activeMarket)
+
+          if (!currentItems.length) {
+            return {}
+          }
+
+          if (state.activeSymbolIndex > 0) {
+            return {
+              activeSymbolIndex: state.activeSymbolIndex - 1,
+            }
+          }
+
+          const availableMarkets = getAvailableMarkets(state.markets)
+          const currentMarketIndex = availableMarkets.indexOf(state.activeMarket)
+          const previousMarket =
+            availableMarkets[
+              (currentMarketIndex - 1 + availableMarkets.length) % availableMarkets.length
+            ]
+          const previousItems = getMarketConfigsByType(state.markets, previousMarket)
+
+          return {
+            activeMarket: previousMarket,
+            activeSymbolIndex: Math.max(previousItems.length - 1, 0),
+          }
+        }),
       goToNextSymbol: () =>
-        set((state) => ({
-          activeSymbolIndex:
-            (state.activeSymbolIndex + 1) % getMarketConfigsByType(state.markets, state.activeMarket).length,
-        })),
+        set((state) => {
+          const currentItems = getMarketConfigsByType(state.markets, state.activeMarket)
+
+          if (!currentItems.length) {
+            return {}
+          }
+
+          if (state.activeSymbolIndex < currentItems.length - 1) {
+            return {
+              activeSymbolIndex: state.activeSymbolIndex + 1,
+            }
+          }
+
+          const availableMarkets = getAvailableMarkets(state.markets)
+          const currentMarketIndex = availableMarkets.indexOf(state.activeMarket)
+          const nextMarket = availableMarkets[(currentMarketIndex + 1) % availableMarkets.length]
+
+          return {
+            activeMarket: nextMarket,
+            activeSymbolIndex: 0,
+          }
+        }),
       updateProxy: (patch) =>
         set((state) => ({
           proxy: {
@@ -168,7 +209,7 @@ export const useReplayStore = create<ReplayStore>()(
     }),
     {
       name: 'trade-daily-store',
-      version: 2,
+      version: 5,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         proxy: state.proxy,
@@ -191,7 +232,42 @@ export const useReplayStore = create<ReplayStore>()(
           }
         }
 
-        return state as PersistedReplayStore
+        let migratedMarkets = (state.markets ?? []).map((item) =>
+          version < 3 && item.market === 'crypto'
+            ? {
+                ...item,
+                interval: '4h',
+              }
+            : item,
+        )
+
+        if (version < 4) {
+          migratedMarkets = replaceMarketGroup(
+            migratedMarkets,
+            'futures',
+            getMarketConfigsByType(DEFAULT_MARKET_CONFIGS, 'futures').map((item) => ({
+              symbol: item.symbol,
+              label: item.label,
+            })),
+          )
+        }
+
+        if (version < 5) {
+          migratedMarkets = migratedMarkets.map((item) =>
+            item.market === 'futures'
+              ? {
+                  ...item,
+                  interval: '1h',
+                  notes: 'HyperLiquid 商品使用官方 candleSnapshot 1H K 线接口',
+                }
+              : item,
+          )
+        }
+
+        return {
+          proxy: state.proxy ?? { ...DEFAULT_PROXY_CONFIG },
+          markets: migratedMarkets,
+        }
       },
     },
   ),

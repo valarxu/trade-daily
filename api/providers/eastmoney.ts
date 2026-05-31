@@ -1,5 +1,5 @@
 import type { CandleItem, MarketConfigItem, MarketReplayResult, ProxyConfig } from '../../shared/replay.js'
-import { trimCandles, toUnixSeconds } from '../../shared/replay.js'
+import { CANDLE_LIMIT, trimCandles, toUnixSeconds } from '../../shared/replay.js'
 import { requestJson } from '../utils/http.js'
 
 interface EastmoneyResponse {
@@ -55,7 +55,7 @@ async function fetchSinaIndexData(
   url.searchParams.set('symbol', config.symbol)
   url.searchParams.set('scale', '240')
   url.searchParams.set('ma', 'no')
-  url.searchParams.set('datalen', '240')
+  url.searchParams.set('datalen', String(CANDLE_LIMIT))
 
   const response = await requestJson<SinaOpenApiResponse>(url.toString(), proxy)
   return trimCandles((response.result?.data ?? []).map(parseSinaCandle))
@@ -83,7 +83,7 @@ export async function fetchAShareData(
       url.searchParams.set('fields2', 'f51,f52,f53,f54,f55,f56')
       url.searchParams.set('klt', '101')
       url.searchParams.set('fqt', '0')
-      url.searchParams.set('lmt', '240')
+      url.searchParams.set('lmt', String(CANDLE_LIMIT))
       url.searchParams.set('end', '20500101')
       url.searchParams.set('secid', secid)
 

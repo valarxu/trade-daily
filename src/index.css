@@ -39,4 +39,13 @@
   .font-display {
     font-family: 'Orbitron', 'IBM Plex Sans SC', sans-serif;
   }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }

@@ -71,7 +71,7 @@ export async function fetchUSStockData(
 ): Promise<MarketReplayResult> {
   const url = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${config.symbol}`)
   url.searchParams.set('interval', '1d')
-  url.searchParams.set('range', '1y')
+  url.searchParams.set('range', '2y')
 
   const response = await requestJson<YahooChartResponse>(url.toString(), proxy)
   const candles = trimCandles(parseYahooCandles(response))

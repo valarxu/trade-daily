@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { LoaderCircle, Play, SlidersHorizontal } from 'lucide-react'
 import ConfigDrawer from '../components/ConfigDrawer'
 import ImmersiveReplay from '../components/ImmersiveReplay'
@@ -27,22 +27,13 @@ export default function Home() {
     goToNextSymbol,
     startReplay,
   } = useReplayStore()
-  const [now, setNow] = useState(() => new Date())
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setNow(new Date())
-    }, 1000)
-
-    return () => window.clearInterval(timer)
-  }, [])
+  const now = useMemo(() => new Date(), [])
 
   const currentTime = useMemo(
     () =>
       new Intl.DateTimeFormat('zh-CN', {
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
         hour12: false,
       }).format(now),
     [now],

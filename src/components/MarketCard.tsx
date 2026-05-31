@@ -1,5 +1,11 @@
 import { Activity, AlertTriangle, CandlestickChart, Database } from 'lucide-react'
-import { getLatestCandle, MARKET_TITLES, type MarketConfigItem, type MarketReplayResult } from '../../shared/replay.js'
+import {
+  CANDLE_LIMIT,
+  getLatestCandle,
+  MARKET_TITLES,
+  type MarketConfigItem,
+  type MarketReplayResult,
+} from '../../shared/replay.js'
 import { formatPercent, formatPrice, formatVolume } from '../utils/format'
 import CandleChart from './CandleChart'
 
@@ -27,7 +33,7 @@ export default function MarketCard({ market, result }: MarketCardProps) {
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
             <span className="rounded-full border border-white/10 px-3 py-1">{market.symbol}</span>
             <span className="rounded-full border border-white/10 px-3 py-1">来源 {market.source}</span>
-            <span className="rounded-full border border-white/10 px-3 py-1">240 根 K 线</span>
+            <span className="rounded-full border border-white/10 px-3 py-1">{CANDLE_LIMIT} 根 K 线</span>
           </div>
         </div>
 
@@ -85,7 +91,7 @@ export default function MarketCard({ market, result }: MarketCardProps) {
         </>
       ) : (
         <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.03] p-8 text-center text-sm text-slate-500">
-          点击“开始复盘”后拉取当前市场的 240 根 K 线与成交量。
+          点击“开始复盘”后拉取当前市场的 {CANDLE_LIMIT} 根 K 线与成交量。
         </div>
       )}
     </article>
